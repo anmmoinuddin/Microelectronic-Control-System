@@ -1,5 +1,5 @@
 /**
-	@author Thomas Grunenberg
+	@author moin
 	@version 0.1
 	@file main.c
 	@brief Ball and Seesaw Template
