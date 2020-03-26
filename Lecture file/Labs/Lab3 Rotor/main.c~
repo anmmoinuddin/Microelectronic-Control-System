@@ -16,7 +16,7 @@
 
     
 /**
-	@author Thomas Grunenberg
+	@author moin
 	@version 0.1
 	@file main.c
 	@brief Software für Versuchsanlage Rotor
@@ -116,6 +116,8 @@ int main(void){
 	for(;;){
 		
 		motor_setSpeed(poti_getValue8bit());
+		
+		led_off();
 		Ti = (T[0]+T[1]+T[2]+T[3])/4;
 		
 	}
@@ -152,5 +154,6 @@ ISR(TIMER1_COMPA_vect)
 		led_off();
 }
 
+ISR(TIMER1_COMPB_vect)
 
 /******************************************************************************/
