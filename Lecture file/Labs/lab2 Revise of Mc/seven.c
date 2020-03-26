@@ -1,0 +1,105 @@
+ 
+/**
+	@author Thomas Grunenberg
+	@version 0.1
+	@file seven.c
+	@brief Microcontroller retake seven
+*/
+
+/**
+	@brief The CPU speed in Hz
+*/
+#define F_CPU 8000000UL
+
+
+/******************************************************************************/
+/* INCLUDED FILES                                                             */
+/******************************************************************************/
+#include <avr/io.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
+#include "init.h"
+#include "lcd.h"
+/******************************************************************************/
+
+
+/******************************************************************************/
+/* FUNCTIONS                                                                  */
+/******************************************************************************/
+
+
+/**
+	@brief Main function
+	@return only a dummy to avoid a compiler warning, not used
+*/
+int main(void){
+
+	init(); 	// Function to initialise I/Os
+	
+	// Input
+	DDRD &= (1 << DDD2);
+	DDRD &= (1 << DDD3);
+	PORTD |= (1 << PD2);
+	PORTD |= (1 << PD3);
+	DDRC |= (1 << PC0);
+
+	// Init prescaler for timer 1 and timer 0
+	// TODO
+	TCCR0B |= (1 << CS00) | (1 << CS02);
+	TCCR1B |= (1 << CS12);
+	TIMSK1 |=(1<<TOIE1); // enable timer one overflow interrupt
+	
+	// Init interrupts
+	// TODO
+	EICRA=(1<<ISC01)|(1<<ISC11);// generates int0 n int1 interupt on falling edge
+	EIMSK |= (1<<INT1)|(1<<INT0);// enable external pin of int1 n int0
+
+	// Enable global interrupt bit
+	// TODO
+	
+
+	sei();
+	
+	for (;;){
+		
+		// Use the code from six.c
+		if( TCNT0 >= 100){
+			PORTC ^= (1 << PC0);
+			TCNT0 = 0;
+		}
+
+	}
+		
+	return 0;
+}
+/******************************************************************************/
+
+/**
+	@brief INT0 interrupt
+*/
+ISR(INT0_vect){
+	// Output on PIN C1 HIGH
+	// TODO
+	PORTC &= ~(1 << PC1);
+}
+/******************************************************************************/
+
+/**
+	@brief INT1 interrupt
+*/
+ISR(INT1_vect){
+	// Output on PIN C1 HIGH
+	// TODO
+	PORTC |= (1 << PC1);
+}
+/******************************************************************************/
+
+/**
+	@brief Timer1 overflow interrupt
+*/
+ISR(TIMER1_OVF_vect){
+	//Flash LED
+	// TODO
+	PORTC ^= (1 << PC2);
+}
+/******************************************************************************/
