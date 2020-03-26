@@ -96,54 +96,65 @@ int main(void){
 	servo_init();
 	irsensors_init();
 
+	TCCR0B |= (1 << CS02)|(1 << CS00);// prescaler 1024
+	TIMSK0 |= (1 << TOIE0);
+	sei(); 	
 
 	
 	servo_setPos(130);
 	for (;;){ 	// Loop forever
 		pos = irsensors_getRawPos();
-		
 		if (pos==1){
 			error=-4;
-			 
+			TCNT0 = 0;	
+			counter = 0;	 
 		}
 		else if (pos==2){
 			error=-2;
+			TCNT0 = 0;
+			counter = 0;
 			  
 		}
 		else if (pos==3){
 			error=-1;
+			TCNT0 = 0;
+			counter = 0;
 			
 		}
 		else if (pos==4){
 			error=1;
-		
-	
+			TCNT0 = 0;
+			counter = 0;
+			
 		}
 		else if (pos==5){
 			error=1;
+			TCNT0 = 0;
+			counter = 0;
 			
-				
 		}
 		else if (pos==6){
 			error=2;
-			
+			TCNT0 = 0;
+			counter = 0;
 			
 		}
 		else if (pos==7){
 			error=3;
-			
+			TCNT0 = 0;
+			counter = 0;
 			  
 		}
 		else if (pos==8){
 			error=6;
-			
-			
+			TCNT0 = 0;
+			counter = 0;
 			
 		}
 	P=(kp*error);
 	D=(kd*(error-old_error))/timestep ;
-	//integral=integral+error;	
-	//I=(ki*(integral))/1000;
+	integral=integral+error;	
+	I=(ki*(integral))/1000;
 
 	
 	output = horizontal+(P+ D+ I);
@@ -151,7 +162,6 @@ int main(void){
 	servo_setPos(output);
 
 	old_error = error;
-	
 	if ( pos != 0 )
 		{
 			old_pos = pos;
@@ -163,4 +173,7 @@ int main(void){
 	return 0;
 
 }
+	ISR(TIMER0_OVF_vect){
+		counter++;
+	}
 /******************************************************************************/

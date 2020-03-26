@@ -32,20 +32,8 @@
 /******************************************************************************/
 /* Global memory                                                              */
 /******************************************************************************/
-volatile int old_error=0;
-int horizontal=130;
-volatile int error=0;	// error value 
-volatile int output;	// servo positon set value
-volatile int pos;		//postion value of the sensor	
-volatile int old_pos = 0;
-volatile int P;
-volatile int D;
-volatile int I;
- int timestep=2;
-volatile int integral;
- int kp=1;
- int kd=1;
- int ki=1;
+
+
 /******************************************************************************/
 /* FUNCTIONS                                                                  */
 /******************************************************************************/
@@ -88,7 +76,7 @@ inline void led_green(uint8_t onOrOff){
 	@brief Main function
 	@return only a dummy to avoid a compiler warning, not used
 */
-
+volatile uint8_t a_old = 0;
 volatile uint8_t counter = 0;
 int main(void){
 
@@ -96,71 +84,73 @@ int main(void){
 	servo_init();
 	irsensors_init();
 
+	TCCR0B |= (1 << CS02)|(1 << CS00);
+	TIMSK0 |= (1 << TOIE0);
+	sei(); 	
 
-	
-	servo_setPos(130);
+	int err_old=0;
+	int d=127;	// Middle value 
+	int err=0;	// error value 
+	int out;	// servo positon set value
+	int a;		//postion value of the sensor	
+	int z = 2;
+	servo_setPos(127);
 	for (;;){ 	// Loop forever
-		pos = irsensors_getRawPos();
-		
-		if (pos==1){
-			error=-4;
-			 
+		a = irsensors_getRawPos();
+		if (a==1){
+			err=-6;	
+			counter = 0; 
 		}
-		else if (pos==2){
-			error=-2;
-			  
+		else if (a==2){
+			err=-4;
+			counter = 0;
 		}
-		else if (pos==3){
-			error=-1;
-			
+		else if (a==3){
+			err=-2;
+			counter = 0;
 		}
-		else if (pos==4){
-			error=1;
-		
-	
+		else if (a==4){
+			err=-1;
+			counter = 0;
 		}
-		else if (pos==5){
-			error=1;
-			
-				
+		else if (a==5){
+			err=1;
+			counter = 0;
 		}
-		else if (pos==6){
-			error=2;
-			
-			
+		else if (a==6){
+			err=2;
+			counter = 0;
 		}
-		else if (pos==7){
-			error=3;
-			
-			  
+		else if (a==7){
+			err=4;
+			counter = 0;
 		}
-		else if (pos==8){
-			error=6;
-			
-			
-			
+		else if (a==8){
+			err=6;
+			counter = 0;
 		}
-	P=(kp*error);
-	D=(kd*(error-old_error))/timestep ;
-	//integral=integral+error;	
-	//I=(ki*(integral))/1000;
-
-	
-	output = horizontal+(P+ D+ I);
-	
-	servo_setPos(output);
-
-	old_error = error;
-	
-	if ( pos != 0 )
-		{
-			old_pos = pos;
+		if ( counter >= 100 ){
+			if ( a_old >= 5 ){
+			d = 129;	
+			}
+			else{
+			d = 127;
+			}
+			counter = 0;
 		}
-		_delay_ms(100);
+	out=d+(z*err-err_old);
+	servo_setPos(out);
+	_delay_ms(220);
+	err_old=err;
+		if ( a != 0 ){
+			a_old = a;
+		}	
 	}
 	
-
+	
 	return 0;
-
 }
+	ISR(TIMER0_OVF_vect){
+		counter++;
+	}
 /******************************************************************************/
